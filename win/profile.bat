@@ -1,5 +1,7 @@
+:: Place this in %systemroot%\System32\Repl\Imports\Scripts
+
 :: Set CMD color
-%USERPROFILE%\Code\reqs\colortool\colortool.exe %USERPROFILE%\Code\misc\dotfiles\win\OneHalfLight.itermcolors
+B:\Dev\reqs\colortool\colortool.exe B:\Dev\misc\dotfiles\win\OneHalfLight.itermcolors
 
 :: Custom Prompt
 prompt $E[1;31m%username%$E[0m at $E[1;33m%computername%$E[0m in $E[1;32m$P$E[0m$_$$ 
