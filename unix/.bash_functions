@@ -35,8 +35,8 @@ function work() {
 }
 
 function unwork() {
-  pkill -f 'Atom' 2>/dev/null
-  pkill -f 'iTerm2' 2>/dev/null
+  osascript -e 'quit app "Atom"'
+  osascript -e 'quit app "iTerm2"'
   
   pkill -f 'ng serve' 2>/dev/null
   pkill -f 'php' 2>/dev/null
