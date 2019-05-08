@@ -6,6 +6,7 @@ alias cl='clear'
 # Easier navigation: .., ~, code directory.
 alias ~="cd ~"
 alias code="cd ~/Code"
+alias subpac="cd ~/Code/work/Subpac"
 # alias code="cd /Volumes/nahiri/Code"
 
 alias ..="cd .."

@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 #THANK YOU DEEPIO !!@!!!!! :D
 
-# Always start from GH directory.
-# cd /Volumes/nahiri/Code
-cd ~/Code
+# Add ssh keys if not there
+if ! ssh-add -l >/dev/null; then
+	ssh-add -K "$HOME/Code/work/Subpac/key.txt"
+fi
 
 # Add `~/bin` to the `$PATH`
-export PATH="$HOME/bin:$PATH";
+ADD_PATH="$HOME/bin:"
+ADD_PATH+="$HOME/Code/misc/dotfiles/unix/commands/git-rmlocal:"
+export PATH="$ADD_PATH$PATH"
 
 # Load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH`.

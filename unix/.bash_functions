@@ -9,9 +9,36 @@ function mac_spoof { sudo macchanger -r en0;}
 function mac_unspoof { sudo macchanger -m 60:03:08:93:e4:d0 en0;}
 
 # disables screensaver/sleep until stopped
-function caffeinate+ {
+function caffeine {
   idleTime="$(defaults -currentHost read com.apple.screensaver idleTime)"
   defaults -currentHost write com.apple.screensaver idleTime 0
   trap "defaults -currentHost write com.apple.screensaver idleTime $idleTime; unset idleTime" RETURN
   caffeinate
+}
+
+# Automated Git
+# function git_rmlocal {
+#   git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs git branch -d
+# }
+
+function git_open {
+  open `git remote -v | grep fetch | awk '{print $2}' | sed 's/git@/http:\/\//' | sed 's/com:/com\//'`| head -n1
+}
+
+function mpv_gl() {
+  mpv --gapless-audio=yes --loop "$1"
+}
+
+function work() {
+  open -a "Atom"
+
+}
+
+function unwork() {
+  pkill -f 'Atom' 2>/dev/null
+  pkill -f 'iTerm2' 2>/dev/null
+  
+  pkill -f 'ng serve' 2>/dev/null
+  pkill -f 'php' 2>/dev/null
+  pkill -f 'autopoc' 2>/dev/null
 }
