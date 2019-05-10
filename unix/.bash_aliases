@@ -3,15 +3,26 @@
 alias l='ls -l'
 alias cl='clear'
 
-# Easier navigation: .., ~, code directory.
+# fast directory navigation
 alias ~="cd ~"
-alias code="cd ~/Code"
-alias subpac="cd ~/Code/work/Subpac"
-# alias code="cd /Volumes/nahiri/Code"
+alias Code="cd ~/Code"
+alias Subpac="cd ~/Code/work/Subpac"
 
 alias ..="cd .."
 alias ....="cd ../.."
 alias ......="cd ../../.."
+
+# if repos are cloned, link them
+if [ -d ~/Code/work/Subpac/autopoc ] ; then
+  alias autopoc="cd ~/Code/work/Subpac/autopoc"
+fi
+if [ -d ~/Code/work/Subpac/autopoc-ui ] ; then
+  alias autopoc-ui="cd ~/Code/work/Subpac/autopoc-ui"
+fi
+if [ -d ~/Code/misc/dotfiles ] ; then
+  alias dotfiles="cd ~/Code/misc/dotfiles"
+fi
+
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'

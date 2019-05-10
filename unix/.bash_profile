@@ -26,5 +26,8 @@ elif [ -f /etc/bash_completion ]; then
 	source /etc/bash_completion;
 fi;
 
+# Add tab completion for git
+source /opt/local/etc/bash_completion.d/git-completion.bash
+
 export CLICOLOR=1
 export TERM=xterm-256color

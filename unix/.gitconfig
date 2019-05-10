@@ -7,6 +7,10 @@
 	name = Noah Baxter
 	email = noah.baxter@mail.mcgill.ca
 [alias]
-	c = commit
+	co = checkout
+	br = branch
+	ci = commit
 	st = status
-	
+	pu = push
+[push]
+	default=current

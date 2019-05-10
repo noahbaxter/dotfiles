@@ -25,20 +25,27 @@ function git_open {
   open `git remote -v | grep fetch | awk '{print $2}' | sed 's/git@/http:\/\//' | sed 's/com:/com\//'`| head -n1
 }
 
-function mpv_gl() {
+function mpv_gl {
   mpv --gapless-audio=yes --loop "$1"
 }
 
-function work() {
+function work {
   open -a "Atom"
+  open -a "Slack"
 
+  if [ -f ~/Code/misc/dotfiles/unix/ascript/work.applescript ] ; then
+    osascript ~/Code/misc/dotfiles/unix/ascript/work.applescript
+  fi
 }
 
-function unwork() {
+function unwork {
   osascript -e 'quit app "Atom"'
-  osascript -e 'quit app "iTerm2"'
-  
+  pkill -9 -f 'Atom' 2>/dev/null
+  osascript -e 'quit app "Slack"'
+
   pkill -f 'ng serve' 2>/dev/null
   pkill -f 'php' 2>/dev/null
   pkill -f 'autopoc' 2>/dev/null
+
+  # osascript -e 'quit app "iTerm2"'
 }
