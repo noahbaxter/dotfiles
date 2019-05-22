@@ -19,11 +19,11 @@ try
     -- Exec commands
     tell first session of current tab of current window
       set name to "Backend"
-      write text "autopoc"
+      write text "cd autopoc"
     end tell
     tell second session of current tab of current window
       set name to "Frontend"
-      write text "autopoc-ui"
+      write text "cd autopocui"
     end tell
   end tell
 end try

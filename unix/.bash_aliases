@@ -5,8 +5,12 @@ alias cl='clear'
 
 # fast directory navigation
 alias ~="cd ~"
-alias Code="cd ~/Code"
-alias Subpac="cd ~/Code/work/Subpac"
+export code=$HOME/Code
+export subpac=$HOME/Code/work/Subpac
+
+export applications=/Applications
+export desktop=$HOME/Desktop
+export downloads=$HOME/Downloads
 
 alias ..="cd .."
 alias ....="cd ../.."
@@ -14,13 +18,13 @@ alias ......="cd ../../.."
 
 # if repos are cloned, link them
 if [ -d ~/Code/work/Subpac/autopoc ] ; then
-  export autopoc='$HOME/Code/work/Subpac/autopoc'
+  export autopoc=$HOME/Code/work/Subpac/autopoc
 fi
 if [ -d ~/Code/work/Subpac/autopoc-ui ] ; then
-  export autopoc_ui='$HOME/Code/work/Subpac/autopoc-ui'
+  export autopocui=$HOME/Code/work/Subpac/autopoc-ui
 fi
 if [ -d ~/Code/misc/dotfiles ] ; then
-  export dotfiles='$HOME/Code/misc/dotfiles'
+  export dotfiles=$HOME/Code/misc/dotfiles
 fi
 
 # Print each PATH entry on a separate line

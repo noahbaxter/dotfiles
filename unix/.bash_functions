@@ -42,13 +42,11 @@ function unwork {
   osascript -e 'quit app "Atom"'
   pkill -9 -f 'Atom' 2>/dev/null
   osascript -e 'quit app "Slack"'
-
-  pkill -9 -f 'Finder' 2>/dev/null
-  open -a "Finder"
+  osascript -e 'tell application "Finder" to close windows'
+  osascript -e 'tell application "iTerm2"' -e 'set mainID to id of front window' -e 'close (every window whose id ≠ mainID)' -e 'end tell'
 
   pkill -f 'ng serve' 2>/dev/null
   pkill -f 'php' 2>/dev/null
   pkill -f 'autopoc' 2>/dev/null
 
-  osascript -e 'quit app "iTerm2"'
 }
