@@ -14,15 +14,14 @@ alias ......="cd ../../.."
 
 # if repos are cloned, link them
 if [ -d ~/Code/work/Subpac/autopoc ] ; then
-  alias autopoc="cd ~/Code/work/Subpac/autopoc"
+  export autopoc='$HOME/Code/work/Subpac/autopoc'
 fi
 if [ -d ~/Code/work/Subpac/autopoc-ui ] ; then
-  alias autopoc-ui="cd ~/Code/work/Subpac/autopoc-ui"
+  export autopoc_ui='$HOME/Code/work/Subpac/autopoc-ui'
 fi
 if [ -d ~/Code/misc/dotfiles ] ; then
-  alias dotfiles="cd ~/Code/misc/dotfiles"
+  export dotfiles='$HOME/Code/misc/dotfiles'
 fi
-
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'

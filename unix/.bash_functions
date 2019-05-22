@@ -43,9 +43,12 @@ function unwork {
   pkill -9 -f 'Atom' 2>/dev/null
   osascript -e 'quit app "Slack"'
 
+  pkill -9 -f 'Finder' 2>/dev/null
+  open -a "Finder"
+
   pkill -f 'ng serve' 2>/dev/null
   pkill -f 'php' 2>/dev/null
   pkill -f 'autopoc' 2>/dev/null
 
-  # osascript -e 'quit app "iTerm2"'
+  osascript -e 'quit app "iTerm2"'
 }

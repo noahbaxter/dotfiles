@@ -7,10 +7,22 @@
 	name = Noah Baxter
 	email = noah.baxter@mail.mcgill.ca
 [alias]
+	l = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --all
+	lg = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)' --all
+
+	a = add
+  ap = add -p
+	c = commit --verbose
+  ca = commit -a --verbose
+  cm = commit -m
+	cam = commit -a -m
+
+	d = diff
 	co = checkout
-	br = branch
-	ci = commit
-	st = status
-	pu = push
+	cob = checkout -b
+	b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
+
+	s = status
+	p = push
 [push]
 	default=current
