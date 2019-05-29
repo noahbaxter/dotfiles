@@ -22,6 +22,7 @@
 	cob = checkout -b
 	b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
 
+	rmb = "!git branch --merged dev | egrep -v '(^\\*|master|dev)' |  xargs git branch -d"
 	s = status
 	pu = push
 	pl = pull
