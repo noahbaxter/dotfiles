@@ -43,7 +43,7 @@ function unwork {
   pkill -9 -f 'Atom' 2>/dev/null
   osascript -e 'quit app "Slack"'
   osascript -e 'tell application "Finder" to close windows'
-  osascript -e 'tell application "iTerm2"' -e 'set mainID to id of front window' -e 'close (every window whose id ≠ mainID)' -e 'end tell'
+  osascript -e 'quit app "iTerm2"'
 
   pkill -f 'ng serve' 2>/dev/null
   pkill -f 'php' 2>/dev/null
