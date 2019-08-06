@@ -17,8 +17,8 @@ alias ....="cd ../.."
 alias ......="cd ../../.."
 
 # if repos are cloned, link them
-if [ -d ~/Code/work/Subpac/autopoc ] ; then
-  export autopoc=$HOME/Code/work/Subpac/autopoc
+if [ -d ~/Code/work/Subpac/flow ] ; then
+  export flow=$HOME/Code/work/Subpac/flow
 fi
 if [ -d ~/Code/work/Subpac/autopoc-ui ] ; then
   export autopocui=$HOME/Code/work/Subpac/autopoc-ui
