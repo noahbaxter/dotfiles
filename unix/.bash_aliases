@@ -20,8 +20,8 @@ alias ......="cd ../../.."
 if [ -d ~/Code/work/Subpac/flow ] ; then
   export flow=$HOME/Code/work/Subpac/flow
 fi
-if [ -d ~/Code/work/Subpac/autopoc-ui ] ; then
-  export autopocui=$HOME/Code/work/Subpac/autopoc-ui
+if [ -d ~/Code/work/Subpac/flow-ui ] ; then
+  export flowui=$HOME/Code/work/Subpac/flow-ui
 fi
 if [ -d ~/Code/misc/dotfiles ] ; then
   export dotfiles=$HOME/Code/misc/dotfiles

@@ -10,23 +10,23 @@ try
     tell current window
       create window with default profile
     end tell
-    
+
     -- Exec commands
     tell current session of current window
-      write text "cd autopoc"
+      write text "cd flow"
       write text "autopoc-api -ll"
     end tell
-    
+
     -- Create new tab
     tell current window
       create tab with default profile
     end tell
-    
+
     -- Exec commands
     tell current session of current window
-      write text "cd autopocui"
+      write text "cd flowui"
       write text "ng serve"
     end tell
-    
+
   end tell
 end try
