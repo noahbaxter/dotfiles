@@ -13,6 +13,8 @@ fi
 ADD_PATH="$HOME/bin:"
 ADD_PATH+="$HOME/Code/misc/dotfiles/unix/commands/git-rmlocal:"
 export PATH="$ADD_PATH$PATH"
+# brew python specifc
+export PATH=/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/local/sbin:$PATH
 
 # Load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH`.
