@@ -6,7 +6,7 @@ shopt -s cdable_vars
 
 # Add ssh keys if not there
 if ! ssh-add -l >/dev/null; then
-	ssh-add -K "$HOME/Code/work/Subpac/key.txt"
+	ssh-add -K "$HOME/.ssh/id_ed25519"
 fi
 
 # Add `~/bin` to the `$PATH`
@@ -32,7 +32,12 @@ elif [ -f /etc/bash_completion ]; then
 fi;
 
 # Add tab completion for git
-source /opt/local/etc/bash_completion.d/git-completion.bash
+if [ -f ~/.git-completion.bash ]; then
+  	. ~/.git-completion.bash
+else
+	curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+	. ~/.git-completion.bash
+fi
 
 export CLICOLOR=1
 export TERM=xterm-256color

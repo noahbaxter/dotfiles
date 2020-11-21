@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Copy files over.
+cp ./.zshrc ~/
 cp ./.bash_aliases ~/
 cp ./.bash_functions ~/
 cp ./.bash_profile ~/
@@ -9,6 +10,7 @@ cp ./.bashrc ~/
 cp ./.gitconfig ~/
 
 # Refresh the settings.
+. ~/.zshrc
 . ~/.bash_aliases
 . ~/.bash_functions
 . ~/.bash_profile
