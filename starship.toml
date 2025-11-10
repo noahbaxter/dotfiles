@@ -1,0 +1,38 @@
+# Minimal Starship configuration
+format = "$directory$git_branch$git_status$cmd_duration$line_break$character "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+format = "[on $symbol$branch]($style) "
+symbol = " "
+style = "bold purple"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+style = "bold red"
+conflicted = "="
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[cmd_duration]
+min_time = 1000
+format = "took [$duration]($style) "
+style = "yellow"
+
+[line_break]
+disabled = false

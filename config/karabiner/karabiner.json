@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "profiles": [
+    {
+      "name": "Default profile",
+      "selected": true,
+      "virtual_hid_keyboard": {
+        "keyboard_type": "ansi"
+      },
+      "complex_modifications": {
+        "rules": [
+          {
+            "description": "Mouse controls with left_control+left_shift (button3=Mission Control, button4=Desktop Left, button5=Desktop Right)",
+            "manipulators": [
+              {
+                "from": {
+                  "modifiers": { "mandatory": ["left_control", "left_shift"] },
+                  "pointing_button": "button3"
+                },
+                "to": [
+                  {
+                    "key_code": "up_arrow",
+                    "modifiers": ["left_control"]
+                  }
+                ],
+                "type": "basic"
+              },
+              {
+                "from": {
+                  "modifiers": { "mandatory": ["left_control", "left_shift"] },
+                  "pointing_button": "button4"
+                },
+                "to": [
+                  {
+                    "key_code": "left_arrow",
+                    "modifiers": ["left_control"]
+                  }
+                ],
+                "type": "basic"
+              },
+              {
+                "from": {
+                  "modifiers": { "mandatory": ["left_control", "left_shift"] },
+                  "pointing_button": "button5"
+                },
+                "to": [
+                  {
+                    "key_code": "right_arrow",
+                    "modifiers": ["left_control"]
+                  }
+                ],
+                "type": "basic"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
