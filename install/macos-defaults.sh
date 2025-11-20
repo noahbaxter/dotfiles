@@ -65,11 +65,11 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# Disable "natural" scroll direction
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+# # Disable "natural" scroll direction
+# defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 
-# Set a faster trackpad tracking speed
-defaults write NSGlobalDomain com.apple.mouse.scaling -float "0.875"
+# # Set a faster trackpad tracking speed
+# defaults write NSGlobalDomain com.apple.mouse.scaling -float "0.875"
 
 # Disable mouse acceleration
 defaults write .GlobalPreferences com.apple.mouse.scaling -1

@@ -222,6 +222,8 @@
 			<string>Default</string>
 			<key>Guid</key>
 			<string>00000000-0000-0000-0000-000000000001</string>
+			<key>Normal Font</key>
+			<string>FiraCodeNerdFontMono-Regular 12</string>
 			<key>Keyboard Map</key>
 			<dict>
 				<key>0xf700-0x260000</key>

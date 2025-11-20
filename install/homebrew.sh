@@ -57,6 +57,7 @@ echo "Installing applications..."
 brew install --cask dropbox
 brew install --cask firefox
 brew install --cask claude
+brew install --cask discord
 brew install --cask karabiner-elements
 brew install --cask stolendata-mpv
 
@@ -71,6 +72,7 @@ echo ""
 echo "Installing work applications..."
 brew install --cask microsoft-teams
 brew install --cask slack
+brew install --cask zoomus
 
 # Music
 echo ""
@@ -79,6 +81,11 @@ brew install --cask ableton-live-suite
 brew install --cask audacity
 brew install --cask reaper
 
+# Fonts
+echo ""
+echo "Installing fonts..."
+brew install --cask font-fira-code-nerd-font
+
 # CLI Tools
 echo ""
 echo "Installing CLI tools..."
@@ -86,6 +93,13 @@ brew install wget
 brew install tree
 brew install starship
 brew install git
+brew install dua-cli
+
+# Starship Configuration
+echo ""
+echo "Configuring Starship..."
+mkdir -p ~/.config
+starship preset catppuccin-powerline -o ~/.config/starship.toml
 
 # Git Config
 echo ""
