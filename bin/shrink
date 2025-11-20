@@ -1,12 +1,298 @@
 #!/bin/zsh
-# Compress files for easy sharing (in place)
-# Usage: shrink <file1> [file2] ... or shrink *.wav
+# Compress files for sharing with quality tiers
+# Supports: audio (WAV, MP3, FLAC, OGG, M4A, AAC, etc), video (MP4, MOV, MKV, AVI, etc), images (JPEG, PNG, GIF, WEBP, etc)
+# Philosophy: maximize quality while staying under size target (default 10MB)
+# Usage: shrink [--limit MB] [--vorbis] [--dry-run] <file1> [file2] ... or shrink *.wav
+
+# Default settings
+TARGET_MB=10
+USE_VORBIS=0
+DRY_RUN=0
+
+# Parse flags
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --limit)
+      TARGET_MB="$2"
+      shift 2
+      ;;
+    --vorbis)
+      USE_VORBIS=1
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift
+      ;;
+    -*)
+      echo "Unknown flag: $1"
+      echo "Usage: shrink [--limit MB] [--vorbis] [--dry-run] <file1> [file2] ... or shrink *.wav"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 if [ -z "$1" ]; then
-  echo "Usage: shrink <file1> [file2] ... or shrink *.wav"
+  echo "Usage: shrink [--limit MB] [--vorbis] [--dry-run] <file1> [file2] ... or shrink *.wav"
   exit 1
 fi
 
+TARGET_BYTES=$((TARGET_MB * 1024 * 1024))
+
+# Color codes
+GREEN='\033[32m'
+YELLOW='\033[33m'
+RED='\033[31m'
+CYAN='\033[36m'
+RESET='\033[0m'
+
+# Generate output filename, avoiding overwrites
+get_output_filename() {
+  local base_name="$1"
+  local new_ext="$2"
+  local orig_ext="$3"
+
+  if [ "$new_ext" = "$orig_ext" ]; then
+    # Same extension - use _shrink suffix
+    echo "${base_name}_shrink.${new_ext}"
+  elif [ -f "${base_name}.${new_ext}" ]; then
+    # File would be overwritten - use _shrink suffix
+    echo "${base_name}_shrink.${new_ext}"
+  else
+    # Safe to use new extension
+    echo "${base_name}.${new_ext}"
+  fi
+}
+
+# Get duration in seconds
+get_duration() {
+  ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1:noprint_wrappers=1 "$1" 2>/dev/null
+}
+
+# Estimate audio file size with 15% safety margin for overhead
+estimate_audio_size() {
+  local input_file="$1"
+  local bitrate_kbps="$2"
+  local duration=$(get_duration "$input_file")
+
+  if [ -z "$duration" ] || [ "$duration" = "null" ]; then
+    echo "0"
+    return
+  fi
+
+  # size in bytes = (bitrate in kbps * 1000 * duration in seconds) / 8 * 1.15 (safety margin for MP3 overhead)
+  echo "$((bitrate_kbps * 1000 * ${duration%.*} / 8 * 115 / 100))"
+}
+
+# Try audio compression with quality tiers
+compress_audio() {
+  local input_file="$1"
+  local base_name="$2"
+
+  # Define quality tiers: (bitrate, extension)
+  if [ "$USE_VORBIS" -eq 1 ]; then
+    local tiers=(
+      "256k:ogg:libvorbis"
+      "192k:ogg:libvorbis"
+      "128k:ogg:libvorbis"
+      "96k:ogg:libvorbis"
+      "64k:ogg:libvorbis"
+    )
+  else
+    local tiers=(
+      "320k:mp3:libmp3lame"
+      "256k:mp3:libmp3lame"
+      "192k:mp3:libmp3lame"
+      "96k:mp3:libmp3lame"
+      "64k:mp3:libmp3lame"
+    )
+  fi
+
+  local final_bitrate=""
+  local final_ext=""
+  local final_codec=""
+  local final_size_estimate=""
+
+  for tier in "${tiers[@]}"; do
+    local bitrate="${tier%%:*}"
+    local ext="${tier#*:}"
+    ext="${ext%%:*}"
+    local codec="${tier##*:}"
+
+    local estimated_size=$(estimate_audio_size "$input_file" "${bitrate%k}")
+    local estimated_mb=$(printf "%.1f" $((estimated_size / 1024 / 1024)))
+
+    if [ "$estimated_size" -lt "$TARGET_BYTES" ]; then
+      final_bitrate="$bitrate"
+      final_ext="$ext"
+      final_codec="$codec"
+      final_size_estimate="$estimated_mb"
+      break
+    fi
+  done
+
+  if [ -z "$final_bitrate" ]; then
+    final_bitrate="64k"
+    if [ "$USE_VORBIS" -eq 1 ]; then
+      final_ext="ogg"
+      final_codec="libvorbis"
+    else
+      final_ext="mp3"
+      final_codec="libmp3lame"
+    fi
+    final_size_estimate="?"
+    echo -e "  ${YELLOW}⚠ Needs extreme compression (${final_bitrate})${RESET}"
+  fi
+
+  local output_file=$(get_output_filename "$base_name" "$final_ext" "$extension")
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo -e "  ${CYAN}[DRY-RUN]${RESET} ${final_bitrate} → $(basename $output_file) (${final_size_estimate}MB)"
+    return
+  fi
+
+  if [ "$final_codec" = "libvorbis" ]; then
+    ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a "$final_bitrate" -c:a "$final_codec" "$output_file" -y 2>&1 | tail -1
+  else
+    ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a "$final_bitrate" -c:a "$final_codec" "$output_file" -y 2>&1 | tail -1
+  fi
+
+  if [ -f "$output_file" ]; then
+    local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+    echo -e "  ${GREEN}✓${RESET} ${final_bitrate} → $(basename $output_file) (${shrunk_size})"
+  else
+    echo -e "  ${RED}✗${RESET} Failed to convert audio"
+  fi
+}
+
+# Try image compression with quality tiers
+compress_image() {
+  local input_file="$1"
+  local base_name="$2"
+  local extension="$3"
+
+  if [[ "$extension" == "gif" ]]; then
+    local output_file=$(get_output_filename "$base_name" "$extension" "$extension")
+
+    if [ "$DRY_RUN" -eq 1 ]; then
+      echo -e "  ${CYAN}[DRY-RUN]${RESET} GIF (resize) → $(basename $output_file)"
+      return
+    fi
+
+    convert "$input_file" -resize "1920x1920>" "$output_file"
+    if [ -f "$output_file" ]; then
+      local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+      echo -e "  ${GREEN}✓${RESET} GIF → $(basename $output_file) (${shrunk_size})"
+    else
+      echo -e "  ${RED}✗${RESET} Failed to compress GIF"
+    fi
+    return
+  fi
+
+  local tiers=(90 80 70 50)
+  local final_quality=""
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    local output_file=$(get_output_filename "$base_name" "$extension" "$extension")
+    echo -e "  ${CYAN}[DRY-RUN]${RESET} 90% → $(basename $output_file)"
+    return
+  fi
+
+  for quality in "${tiers[@]}"; do
+    local temp_file="/tmp/shrink_test_${RANDOM}.${extension}"
+    convert "$input_file" -resize "1920x1920>" -quality "$quality" "$temp_file" 2>/dev/null
+
+    local temp_size=$(du -b "$temp_file" 2>/dev/null | awk '{print $1}')
+    rm -f "$temp_file"
+
+    if [ -z "$temp_size" ] || [ "$temp_size" -lt "$TARGET_BYTES" ]; then
+      final_quality="$quality"
+      break
+    fi
+  done
+
+  if [ -z "$final_quality" ]; then
+    echo -e "  ${YELLOW}⚠ Needs extreme compression (50%)${RESET}"
+    final_quality=50
+  fi
+
+  local output_file=$(get_output_filename "$base_name" "$extension" "$extension")
+  convert "$input_file" -resize "1920x1920>" -quality "$final_quality" "$output_file"
+
+  if [ -f "$output_file" ]; then
+    local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+    echo -e "  ${GREEN}✓${RESET} ${final_quality}% → $(basename $output_file) (${shrunk_size})"
+  else
+    echo -e "  ${RED}✗${RESET} Failed to compress image"
+  fi
+}
+
+# Try video compression with quality tiers
+compress_video() {
+  local input_file="$1"
+  local base_name="$2"
+
+  local tiers=(
+    "1080p:1920:-1:2500"
+    "720p:1280:-1:1500"
+    "480p:854:-1:800"
+    "360p:640:-1:400"
+  )
+
+  local final_scale=""
+  local final_bitrate=""
+  local final_label=""
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    local output_file=$(get_output_filename "$base_name" "mp4" "$extension")
+    echo -e "  ${CYAN}[DRY-RUN]${RESET} 720p → $(basename $output_file)"
+    return
+  fi
+
+  for tier in "${tiers[@]}"; do
+    local label="${tier%%:*}"
+    local scale="${tier#*:}"
+    local bitrate="${scale##*:}"
+    scale="${scale%:*}"
+
+    local temp_file="/tmp/shrink_test_${RANDOM}.mp4"
+
+    # Quick encode test
+    ffmpeg -i "$input_file" -vf "scale=${scale}:-1" -preset ultrafast -b:v "${bitrate}k" -c:a aac -b:a 32k "$temp_file" -y 2>&1 >/dev/null
+
+    local temp_size=$(du -b "$temp_file" 2>/dev/null | awk '{print $1}')
+    rm -f "$temp_file"
+
+    if [ -z "$temp_size" ] || [ "$temp_size" -lt "$TARGET_BYTES" ]; then
+      final_scale="$scale"
+      final_bitrate="${bitrate}k"
+      final_label="$label"
+      break
+    fi
+  done
+
+  if [ -z "$final_scale" ]; then
+    echo -e "  ${YELLOW}⚠ Needs extreme compression (360p)${RESET}"
+    final_scale="640"
+    final_bitrate="400k"
+    final_label="360p"
+  fi
+
+  local output_file=$(get_output_filename "$base_name" "mp4" "$extension")
+  ffmpeg -i "$input_file" -vf "scale=${final_scale}:-1" -preset slow -b:v "$final_bitrate" -c:a aac -b:a 64k "$output_file" -y 2>&1 | tail -1
+
+  if [ -f "$output_file" ]; then
+    local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+    echo -e "  ${GREEN}✓${RESET} ${final_label} (${final_bitrate}) → $(basename $output_file) (${shrunk_size})"
+  else
+    echo -e "  ${RED}✗${RESET} Failed to compress video"
+  fi
+}
+
+# Main loop
 for input_file in "$@"; do
   if [ ! -f "$input_file" ]; then
     echo "Warning: '$input_file' is not a file, skipping..."
@@ -17,70 +303,32 @@ for input_file in "$@"; do
   local original_filename=$(basename -- "$input_file")
   local base_name="${original_filename%.*}"
   local extension="${original_filename##*.}"
-  local output_file=""
 
-  echo "Processing '$original_filename'..."
+  echo "Processing '$original_filename' (target: ${TARGET_MB}MB)..."
 
   case "$mime_type" in
-    # --- Audio Conversion (WAV/MP3 to MP3) ---
-    audio/x-wav | audio/wav | audio/mp3 | audio/mpeg)
-      output_file="${base_name}_compressed.mp3"
-      echo "  → Converting to MP3 (96kbps)..."
-      ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a 96k -c:a libmp3lame "$output_file" -y 2>&1 | tail -1
-      if [ -f "$output_file" ]; then
-        local original_size=$(du -h "$input_file" | awk '{print $1}')
-        local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
-        echo "  ✓ $original_size → $shrunk_size"
-      else
-        echo "  ✗ Failed to convert audio"
-      fi
+    audio/*)
+      compress_audio "$input_file" "$base_name"
       ;;
-
-    # --- Image Compression ---
-    image/jpeg | image/png | image/webp | image/gif)
-      output_file="${base_name}_compressed.${extension}"
-      if [[ "$mime_type" == "image/gif" ]]; then
-        echo "  → Compressing GIF (max 1920px)..."
-        convert "$input_file" -resize "1920x1920>" "$output_file"
-      else
-        echo "  → Compressing image (max 1920px, 85% quality)..."
-        convert "$input_file" -resize "1920x1920>" -quality 85 "$output_file"
-      fi
-
-      if [ -f "$output_file" ]; then
-        local original_size=$(du -h "$input_file" | awk '{print $1}')
-        local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
-        echo "  ✓ $original_size → $shrunk_size"
-      else
-        echo "  ✗ Failed to compress image"
-      fi
+    image/*)
+      compress_image "$input_file" "$base_name" "$extension"
       ;;
-
-    # --- Video Compression (Discord ~10MB target) ---
     video/*)
-      output_file="${base_name}_compressed.mp4"
-      echo "  → Compressing video for Discord (~10MB target)..."
-      ffmpeg -i "$input_file" -vf "scale=min(854\,iw):-1" -preset slow -crf 30 -c:a aac -b:a 64k "$output_file" -y 2>&1 | tail -1
-      if [ -f "$output_file" ]; then
-        local original_size=$(du -h "$input_file" | awk '{print $1}')
-        local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
-        echo "  ✓ $original_size → $shrunk_size"
-      else
-        echo "  ✗ Failed to compress video"
-      fi
+      compress_video "$input_file" "$base_name"
       ;;
-
-    # --- Generic Compression ---
     *)
-      output_file="${original_filename}.zip"
-      echo "  → Zipping for compression..."
-      zip -r -q "$output_file" "$input_file"
-      if [ -f "$output_file" ]; then
-        local original_size=$(du -h "$input_file" | awk '{print $1}')
-        local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
-        echo "  ✓ $original_size → $shrunk_size"
+      local output_file=$(get_output_filename "$base_name" "zip" "$extension")
+
+      if [ "$DRY_RUN" -eq 1 ]; then
+        echo -e "  ${CYAN}[DRY-RUN]${RESET} zip → $(basename $output_file)"
       else
-        echo "  ✗ Failed to zip file"
+        zip -r -q "$output_file" "$input_file"
+        if [ -f "$output_file" ]; then
+          local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+          echo -e "  ${GREEN}✓${RESET} zip → $(basename $output_file) (${shrunk_size})"
+        else
+          echo -e "  ${RED}✗${RESET} Failed to zip file"
+        fi
       fi
       ;;
   esac
