@@ -1,0 +1,122 @@
+#!/bin/zsh
+
+venv() {
+    # Color codes
+    local RED="\e[31m"
+    local GREEN="\e[32m"
+    local YELLOW="\e[33m"
+    local BLUE="\e[34m"
+    local RESET="\e[0m"
+
+    # Options
+    local venv_dir=""
+    local python_version="python3"
+    local delete_flag=false
+    local regenerate_flag=false
+    local no_install=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --delete)
+                delete_flag=true
+                shift
+                ;;
+            --regenerate)
+                regenerate_flag=true
+                shift
+                ;;
+            --no-install)
+                no_install=true
+                shift
+                ;;
+            --version)
+                [[ -z "$2" ]] && { echo -e "${RED}Error: --version requires an argument (e.g., 3.12)${RESET}"; return 1; }
+                python_version="python$2"
+                shift 2
+                ;;
+            *)
+                echo -e "${RED}Usage: venv [--delete] [--regenerate] [--no-install] [--version 3.12]${RESET}"
+                return 1
+                ;;
+        esac
+    done
+
+    # Handle --delete flag
+    if [[ "$delete_flag" == true ]]; then
+        if [[ -d "venv" ]]; then
+            rm -rf venv
+            echo -e "${GREEN}✓ Deleted venv/${RESET}"
+        elif [[ -d ".venv" ]]; then
+            rm -rf .venv
+            echo -e "${GREEN}✓ Deleted .venv/${RESET}"
+        else
+            echo -e "${YELLOW}No venv found to delete${RESET}"
+        fi
+        return 0
+    fi
+
+    # Check if we're already in a local venv - if so, just deactivate and return
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        if [[ -d "venv" && "$VIRTUAL_ENV" == "$PWD/venv" ]] || [[ -d ".venv" && "$VIRTUAL_ENV" == "$PWD/.venv" ]]; then
+            echo -e "${YELLOW}Deactivating virtual environment...${RESET}"
+            deactivate
+            echo -e "${GREEN}✓ Deactivated${RESET}"
+            return 0
+        else
+            echo -e "${YELLOW}Deactivating current virtual environment...${RESET}"
+            deactivate
+        fi
+    fi
+
+    # Find existing venv directory
+    if [[ -d "venv" ]]; then
+        venv_dir="venv"
+    elif [[ -d ".venv" ]]; then
+        venv_dir=".venv"
+    fi
+
+    # Handle --regenerate flag
+    if [[ "$regenerate_flag" == true ]]; then
+        if [[ -n "$venv_dir" ]]; then
+            echo -e "${YELLOW}Removing old virtual environment...${RESET}"
+            rm -rf "$venv_dir"
+        fi
+        venv_dir=""
+    fi
+
+    # Activate existing venv or create new one
+    if [[ -n "$venv_dir" ]] && [[ -f "$venv_dir/bin/activate" ]]; then
+        echo -e "${BLUE}Activating virtual environment...${RESET}"
+        source "$venv_dir/bin/activate"
+    else
+        # Create new virtual environment
+        venv_dir="venv"
+        echo -e "${BLUE}Creating virtual environment with $python_version...${RESET}"
+
+        # Check if Python version exists
+        if ! command -v "$python_version" &> /dev/null; then
+            echo -e "${RED}Error: $python_version not found${RESET}"
+            return 1
+        fi
+
+        $python_version -m venv "$venv_dir" || {
+            echo -e "${RED}Error: Failed to create venv${RESET}"
+            return 1
+        }
+
+        source "$venv_dir/bin/activate"
+
+        # Install requirements unless --no-install
+        if [[ "$no_install" != true ]]; then
+            if [[ -f "requirements.txt" ]]; then
+                echo -e "${BLUE}Installing requirements.txt...${RESET}"
+                pip install -r requirements.txt || echo -e "${YELLOW}Warning: Some packages failed to install${RESET}"
+            else
+                echo -e "${YELLOW}No requirements.txt found${RESET}"
+            fi
+        fi
+    fi
+
+    echo -e "${GREEN}✓ Virtual environment ready${RESET}"
+}

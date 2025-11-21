@@ -15,3 +15,8 @@ export PATH="/Users/noahbaxter/.antigravity/antigravity/bin:$PATH"
 
 # Custom scripts in dotfiles
 export PATH="$HOME/Code/personal/dotfiles/bin:$PATH"
+
+# Source shell functions
+for f in "$HOME/Code/personal/dotfiles/functions"/*; do
+    [[ -f "$f" ]] && source "$f"
+done

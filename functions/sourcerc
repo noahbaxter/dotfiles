@@ -1,0 +1,41 @@
+#!/bin/zsh
+
+sourcerc() {
+    # Color codes
+    local GREEN="\e[32m"
+    local BLUE="\e[34m"
+    local YELLOW="\e[33m"
+    local RESET="\e[0m"
+
+    local sourced=0
+
+    # Source zshrc if in zsh
+    if [[ -n "$ZSH_VERSION" ]]; then
+        if [[ -f ~/.zshrc ]]; then
+            echo -e "${BLUE}Sourcing ~/.zshrc${RESET}"
+            source ~/.zshrc
+            ((sourced++))
+        fi
+    fi
+
+    # Source bashrc if in bash
+    if [[ -n "$BASH_VERSION" ]]; then
+        if [[ -f ~/.bashrc ]]; then
+            echo -e "${BLUE}Sourcing ~/.bashrc${RESET}"
+            source ~/.bashrc
+            ((sourced++))
+        fi
+    fi
+
+    # Fallback: try to source based on what exists
+    if [[ $sourced -eq 0 ]]; then
+        [[ -f ~/.zshrc ]] && { source ~/.zshrc; echo -e "${BLUE}Sourced ~/.zshrc${RESET}"; ((sourced++)); }
+        [[ -f ~/.bashrc ]] && { source ~/.bashrc; echo -e "${BLUE}Sourced ~/.bashrc${RESET}"; ((sourced++)); }
+    fi
+
+    if [[ $sourced -gt 0 ]]; then
+        echo -e "${GREEN}✓ Shell configuration refreshed${RESET}"
+    else
+        echo -e "${YELLOW}No shell configuration files found${RESET}"
+    fi
+}
