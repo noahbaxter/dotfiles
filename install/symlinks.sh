@@ -6,8 +6,8 @@ DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 echo "Installing dotfiles from $DOTFILES_DIR"
 echo ""
 
-# Function to backup and symlink
-link_dotfile() {
+# Function to backup and symlink a file
+link_file() {
   local src=$1
   local dest=$2
 
@@ -29,27 +29,55 @@ link_dotfile() {
   fi
 }
 
+# Function to backup and symlink a directory
+link_dir() {
+  local src=$1
+  local dest=$2
+
+  if [ ! -d "$src" ]; then
+    echo "  ⚠ Skipping $dest (source not found)"
+    return
+  fi
+
+  if [ -L "$dest" ]; then
+    echo "  ✓ $dest already linked"
+  elif [ -d "$dest" ]; then
+    echo "  ⚠ Backing up existing $dest"
+    mv "$dest" "$dest.backup"
+    ln -s "$src" "$dest"
+    echo "  ✓ Linked $dest"
+  else
+    ln -s "$src" "$dest"
+    echo "  ✓ Linked $dest"
+  fi
+}
+
 echo "Shell Configuration:"
-link_dotfile "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+link_file "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
 
 echo ""
 echo "Git Configuration:"
-link_dotfile "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
+link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 
 echo ""
 echo "Shell Prompt:"
 mkdir -p "$HOME/.config"
-link_dotfile "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
 
 echo ""
 echo "Keyboard Configuration:"
 mkdir -p "$HOME/.config/karabiner"
-link_dotfile "$DOTFILES_DIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
+link_file "$DOTFILES_DIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
 
 echo ""
 echo "iTerm2 Configuration:"
 mkdir -p "$HOME/Library/Preferences"
-link_dotfile "$DOTFILES_DIR/config/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/com.googlecode.iterm2.plist"
+link_file "$DOTFILES_DIR/config/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/com.googlecode.iterm2.plist"
+
+echo ""
+echo "Claude Code:"
+mkdir -p "$HOME/.claude"
+link_dir "$DOTFILES_DIR/.claude/commands" "$HOME/.claude/commands"
 
 echo ""
 echo "Installation complete! ✓"
