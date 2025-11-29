@@ -7,9 +7,11 @@ else
 fi
 
 # Aliases
+alias l='ls -l'
 alias ll='ls -lA'
 alias la='ls -A'
 alias cl='clear'
+alias degate='xattr -d com.apple.quarantine'
 # Added by Antigravity
 export PATH="/Users/noahbaxter/.antigravity/antigravity/bin:$PATH"
 
@@ -20,3 +22,10 @@ export PATH="$HOME/Code/personal/dotfiles/bin:$PATH"
 for f in "$HOME/Code/personal/dotfiles/functions"/*; do
     [[ -f "$f" ]] && source "$f"
 done
+
+# Created by `pipx` on 2025-11-22 07:11:18
+export PATH="$PATH:/Users/noahbaxter/.local/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
