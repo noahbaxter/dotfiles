@@ -91,7 +91,7 @@ venv() {
         source "$venv_dir/bin/activate"
     else
         # Create new virtual environment
-        venv_dir="venv"
+        venv_dir=".venv"
         echo -e "${BLUE}Creating virtual environment with $python_version...${RESET}"
 
         # Check if Python version exists
