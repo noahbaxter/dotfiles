@@ -33,3 +33,27 @@ You have working but messy changes that need to be committed properly.
 5. **Execute after approval**
    - Stage and commit each group sequentially
    - Stop if something looks wrong
+
+6. **Update worklogs**
+   After commits are done:
+   - Ask the user: "What's next? (or skip)"
+   - Append an entry to `.claude/worklog.md` (repo-local, create if needed)
+   - Append a one-liner to `~/.claude/worklog.md` (global)
+   - Make sure `.claude/worklog.md` is in `.gitignore`
+
+## Worklog format
+
+**Repo worklog (`.claude/worklog.md`):**
+```markdown
+## YYYY-MM-DD
+- Committed: [summary of what was just committed]
+- Next: [user's answer, or "unspecified"]
+```
+
+**Global worklog (`~/.claude/worklog.md`):**
+```markdown
+## YYYY-MM-DD
+- **repo-name**: [one-liner summary of commits]
+```
+
+Keep it terse. Breadcrumbs, not documentation.
