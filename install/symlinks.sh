@@ -78,6 +78,7 @@ echo ""
 echo "Claude Code:"
 mkdir -p "$HOME/.claude"
 link_dir "$DOTFILES_DIR/.claude/commands" "$HOME/.claude/commands"
+link_file "$DOTFILES_DIR/.claude/settings.json" "$HOME/.claude/settings.json"
 
 echo ""
 echo "Installation complete! ✓"
