@@ -4,50 +4,46 @@ description: Get back up to speed on a repo you haven't touched in a while
 
 # Recap
 
-You're jumping back into a repo cold and need to figure out where you left off.
-
-**This is the start-of-session command.** It syncs the worklog and gives you context.
-
-**This is the ONLY command that can create a worklog.** Both `/polish` and `/tidy` require a worklog to exist - they'll bail and tell the user to run `/recap` first if it's missing.
-
-## Specs to Follow
-
-- `.claude/worklog-spec.md` - Worklog format, structure, and command flow
-- `.claude/tone-spec.md` - Writing style (casual, direct, no fluff)
+You're jumping back into a repo cold. Answer: What am I doing? What was I doing? What should I do next?
 
 ## Steps
 
 1. **Gather context**
-   - `git log --oneline -50` for recent commits
+   - `git log --oneline -30` for recent commits
    - `git log main..HEAD --oneline` (or master) to see branch-specific work
    - `git status` and `git diff --stat` for uncommitted work
    - Read `.claude/worklog.md` if it exists
-   - Read the specs listed above
 
-2. **Update the worklog FIRST** (before synthesizing recap)
+2. **If no worklog exists, create one**
 
-   **If no worklog exists:**
-   - Create `.claude/worklog.md` with the structure from the spec
-   - Backfill the Session Log from commit history (group by date)
-   - Leave Goals & Ideas empty or prompt user for initial goals
-   - Ensure it's in `.gitignore`
-   - Tell the user you bootstrapped it
+   Create `.claude/worklog.md`:
+   ```markdown
+   # Worklog
 
-   **If worklog exists but Session Log is stale** (commits after last entry):
-   - Add entries for commits since last session entry
-   - Keep it minimal for backfilled entries (just date + Did)
+   ## Ideas
+   [Brainstorming, possibilities, things to decide on later]
 
-   **If there's uncommitted work:**
-   - Note it in today's entry or create a WIP entry
+   ## Backlog
+   [Deferred tasks - things mentioned but not done yet]
 
-3. **Synthesize the recap** (from the now-updated worklog)
+   ## Last Session
+   [What was happening, state of things, what's next]
+   ```
 
-   Present clearly and concisely:
-   - **Goals**: What are we ultimately trying to do? (from Goals & Ideas section)
-   - **Recent work**: What happened in the last few sessions?
-   - **Current state**: Clean, WIP, or broken? Any uncommitted changes?
-   - **What's next**: Follow the interpolation rules from the spec
+   Backfill Last Session from git history if there's useful context.
 
-4. **Keep it casual**
+   Add `.claude/worklog.md` to `.gitignore` if not already there.
+
+3. **Synthesize the recap**
+
+   Present concisely:
+   - **What you were doing**: Current focus based on recent commits + worklog
+   - **State**: Clean, WIP, or broken? Uncommitted changes?
+   - **Ideas**: Anything in the Ideas section worth noting
+   - **Backlog**: Pending deferred tasks (high priority first)
+   - **What's next**: Based on Last Session, backlog, or recent momentum
+
+4. **Keep it brief**
    - Write like you're talking to yourself
-   - "You were fixing the auth bug, left it broken" not "The previous session encountered issues with authentication"
+   - "You were fixing auth, left it broken at token refresh" not "The previous session encountered authentication implementation issues"
+   - Just the facts needed to continue
