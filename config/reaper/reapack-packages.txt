@@ -1,0 +1,6 @@
+# Required ReaPack Packages
+# Install via: Extensions > ReaPack > Browse packages
+# Search for each package name and install
+
+js_ReaScriptAPI                     # js_ReaScriptAPI: API functions for ReaScripts
+talagan_Docking tools               # Docking tools : actions to resize docks
