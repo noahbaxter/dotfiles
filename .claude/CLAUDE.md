@@ -75,6 +75,11 @@ Minimal. Code should be self-documenting.
 - Match repo's existing style
 - On personal projects, pushing to main is fine
 
+## Git Commands
+
+Use simple `git` commands without `-C`. The working directory is already correct.
+Don't use `git -C /path/to/repo` - just use `git` directly.
+
 ## Tests
 
 - Tests catch real bugs, not inflate coverage
