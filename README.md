@@ -68,11 +68,16 @@ If you already have the repo cloned, you can run individual steps:
 
 After running bootstrap.sh, complete these manual steps:
 
-1. **Karabiner-Elements**
+1. **iTerm2** - Quit iTerm2, then run:
+   ```bash
+   ./install/iterm.sh
+   ```
+
+2. **Karabiner-Elements**
    - Open Karabiner-Elements and enable the mouse shortcuts rule
    - (Mouse button 3/4/5 with Control+Shift for desktop navigation)
 
-2. **System Changes**
+3. **System Changes**
    - Log out and log back in for all macOS system changes to take effect
 
 ## Customization
@@ -89,6 +94,7 @@ Edit files in this repo, and since they're symlinked, changes are immediately tr
 ├── install/
 │   ├── homebrew.sh           # Installs Homebrew and applications
 │   ├── symlinks.sh           # Creates symlinks for dotfiles
+│   ├── iterm.sh              # Configures iTerm2 preferences
 │   └── macos-defaults.sh     # Applies macOS system defaults
 └── config/
     ├── karabiner/

@@ -71,8 +71,7 @@ link_file "$DOTFILES_DIR/config/karabiner/karabiner.json" "$HOME/.config/karabin
 
 echo ""
 echo "iTerm2 Configuration:"
-mkdir -p "$HOME/Library/Preferences"
-link_file "$DOTFILES_DIR/config/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/com.googlecode.iterm2.plist"
+echo "  → Run: ./install/iterm.sh (requires iTerm2 to be closed)"
 
 echo ""
 echo "Claude Code:"
