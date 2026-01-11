@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Compress files for sharing with quality tiers
-# Supports: audio (WAV, MP3, FLAC, OGG, M4A, AAC, etc), video (MP4, MOV, MKV, AVI, etc), images (JPEG, PNG, GIF, WEBP, etc)
+# Supports: audio (WAV, MP3, FLAC, OGG, M4A, AAC, etc), video (MP4, MOV, MKV, AVI, etc), images (JPEG, PNG, GIF, WEBP, etc), PDF
 # Philosophy: maximize quality while staying under size target (default 10MB)
 # Usage: shrink [--limit MB] [--vorbis] [--dry-run] <file1> [file2] ... or shrink *.wav
 
@@ -154,11 +154,7 @@ compress_audio() {
     return
   fi
 
-  if [ "$final_codec" = "libvorbis" ]; then
-    ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a "$final_bitrate" -c:a "$final_codec" "$output_file" -y 2>&1 | tail -1
-  else
-    ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a "$final_bitrate" -c:a "$final_codec" "$output_file" -y 2>&1 | tail -1
-  fi
+  ffmpeg -i "$input_file" -vn -ar 44100 -ac 2 -b:a "$final_bitrate" -c:a "$final_codec" "$output_file" -y 2>&1 | tail -1
 
   if [ -f "$output_file" ]; then
     local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
@@ -292,6 +288,76 @@ compress_video() {
   fi
 }
 
+# Try PDF compression with quality tiers using Ghostscript
+compress_pdf() {
+  local input_file="$1"
+  local base_name="$2"
+
+  if ! command -v gs &>/dev/null; then
+    echo -e "  ${RED}✗${RESET} Ghostscript (gs) not found. Install with: brew install ghostscript"
+    return
+  fi
+
+  local tiers=("/prepress" "/printer" "/ebook" "/screen")
+  local tier_labels=("prepress" "printer" "ebook" "screen")
+  local final_tier=""
+  local final_label=""
+  local final_temp=""
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    local output_file=$(get_output_filename "$base_name" "pdf" "pdf")
+    echo -e "  ${CYAN}[DRY-RUN]${RESET} ebook → $(basename $output_file)"
+    return
+  fi
+
+  for ((i=1; i<=${#tiers[@]}; i++)); do
+    local tier="${tiers[$i]}"
+    local label="${tier_labels[$i]}"
+    local temp_file="/tmp/shrink_pdf_${RANDOM}.pdf"
+
+    echo -ne "  Trying ${label}...\r"
+    gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS="$tier" \
+       -dNOPAUSE -dQUIET -dBATCH -sOutputFile="$temp_file" "$input_file" 2>/dev/null
+
+    local temp_size=$(stat -f%z "$temp_file" 2>/dev/null)
+    local temp_mb=$((temp_size / 1024 / 1024))
+
+    if [ -n "$temp_size" ] && [ "$temp_size" -lt "$TARGET_BYTES" ]; then
+      final_tier="$tier"
+      final_label="$label"
+      # Keep this temp file as the final output
+      final_temp="$temp_file"
+      break
+    fi
+    echo -e "  Trying ${label}... ${temp_mb}MB (too large)"
+    rm -f "$temp_file"
+  done
+
+  if [ -z "$final_tier" ]; then
+    echo -e "  ${YELLOW}⚠ Needs extreme compression (screen)${RESET}"
+    final_tier="/screen"
+    final_label="screen"
+  fi
+
+  local output_file=$(get_output_filename "$base_name" "pdf" "pdf")
+
+  # If we already have the right temp file, just move it; otherwise compress again
+  if [ -n "$final_temp" ] && [ -f "$final_temp" ]; then
+    mv "$final_temp" "$output_file"
+  else
+    echo -ne "  Compressing ${final_label}...\r"
+    gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS="$final_tier" \
+       -dNOPAUSE -dQUIET -dBATCH -sOutputFile="$output_file" "$input_file" 2>/dev/null
+  fi
+
+  if [ -f "$output_file" ]; then
+    local shrunk_size=$(du -h "$output_file" | awk '{print $1}')
+    echo -e "  ${GREEN}✓${RESET} ${final_label} → $(basename $output_file) (${shrunk_size})"
+  else
+    echo -e "  ${RED}✗${RESET} Failed to compress PDF"
+  fi
+}
+
 # Main loop
 for input_file in "$@"; do
   if [ ! -f "$input_file" ]; then
@@ -315,6 +381,9 @@ for input_file in "$@"; do
       ;;
     video/*)
       compress_video "$input_file" "$base_name"
+      ;;
+    application/pdf)
+      compress_pdf "$input_file" "$base_name"
       ;;
     *)
       local output_file=$(get_output_filename "$base_name" "zip" "$extension")
