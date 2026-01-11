@@ -7,11 +7,13 @@ else
 fi
 
 # Aliases
-alias l='ls -l'
-alias ll='ls -lA'
+alias l='ls -lAhF'
+alias ll='ls -lAhFS'
 alias la='ls -A'
+alias 'l@'='ls -lAhF@'
 alias cl='clear'
 alias degate='xattr -d com.apple.quarantine'
+alias claude-work='CLAUDE_CONFIG_DIR=~/.claude-work claude'
 # Added by Antigravity
 export PATH="/Users/noahbaxter/.antigravity/antigravity/bin:$PATH"
 

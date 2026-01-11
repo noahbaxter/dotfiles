@@ -56,17 +56,30 @@ venv() {
         return 0
     fi
 
-    # Check if we're already in a local venv - if so, just deactivate and return
+    # Clean up any existing venv activation
     if [[ -n "$VIRTUAL_ENV" ]]; then
-        if [[ -d "venv" && "$VIRTUAL_ENV" == "$PWD/venv" ]] || [[ -d ".venv" && "$VIRTUAL_ENV" == "$PWD/.venv" ]]; then
+        local is_local_venv=false
+        [[ -d "venv" && "$VIRTUAL_ENV" == "$PWD/venv" ]] && is_local_venv=true
+        [[ -d ".venv" && "$VIRTUAL_ENV" == "$PWD/.venv" ]] && is_local_venv=true
+
+        if [[ "$is_local_venv" == true ]]; then
             echo -e "${YELLOW}Deactivating virtual environment...${RESET}"
-            deactivate
+            deactivate 2>/dev/null
             echo -e "${GREEN}✓ Deactivated${RESET}"
             return 0
-        else
-            echo -e "${YELLOW}Deactivating current virtual environment...${RESET}"
-            deactivate
         fi
+
+        # Stale or different venv - clean up manually since deactivate may not exist
+        if [[ ! -d "$VIRTUAL_ENV" ]]; then
+            echo -e "${YELLOW}Cleaning up stale venv ($VIRTUAL_ENV)...${RESET}"
+        else
+            echo -e "${YELLOW}Deactivating other venv...${RESET}"
+        fi
+        # Remove old venv bin from PATH
+        PATH="${PATH//$VIRTUAL_ENV\/bin:/}"
+        PATH="${PATH//:$VIRTUAL_ENV\/bin/}"
+        unset VIRTUAL_ENV
+        unset PYTHONHOME 2>/dev/null
     fi
 
     # Find existing venv directory
@@ -89,7 +102,30 @@ venv() {
     if [[ -n "$venv_dir" ]] && [[ -f "$venv_dir/bin/activate" ]]; then
         echo -e "${BLUE}Activating virtual environment...${RESET}"
         source "$venv_dir/bin/activate"
-    else
+
+        # Verify activation actually worked
+        local expected_venv="$PWD/$venv_dir"
+        local actual_python="$(command -v python3 2>/dev/null)"
+        if [[ "$VIRTUAL_ENV" != "$expected_venv" ]] || [[ "$actual_python" != "$expected_venv/bin/python3" ]]; then
+            echo -e "${RED}✗ Venv activation failed (path mismatch - was this directory renamed?)${RESET}"
+            echo -en "${YELLOW}Regenerate venv? [y/N] ${RESET}"
+            read -k 1 response
+            echo
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                # Clean up failed activation
+                PATH="${PATH//$VIRTUAL_ENV\/bin:/}"
+                PATH="${PATH//:$VIRTUAL_ENV\/bin/}"
+                unset VIRTUAL_ENV
+                rm -rf "$venv_dir"
+                venv_dir=""
+            else
+                echo -e "${YELLOW}Run 'venv --regenerate' to fix${RESET}"
+                return 1
+            fi
+        fi
+    fi
+
+    if [[ -z "$venv_dir" ]]; then
         # Create new virtual environment
         venv_dir=".venv"
         echo -e "${BLUE}Creating virtual environment with $python_version...${RESET}"
