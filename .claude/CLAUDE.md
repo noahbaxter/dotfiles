@@ -103,3 +103,37 @@ Don't use `git -C /path/to/repo` - just use `git` directly.
 - Don't add error handling for impossible scenarios
 - Don't create abstractions for one-time operations
 - Don't guess at requirements - ask
+
+## Agentic Work
+
+Rules for multi-step autonomous work.
+
+### Git Worktrees
+
+Use worktrees for risky/experimental changes - refactors, rewrites, "let me try something".
+
+- Create at `../repo-worktrees/branch-name` (sibling to main repo)
+- Just do it for clearly experimental work, don't ask
+- Offer to clean up after the experiment concludes
+
+```bash
+git worktree add ../repo-worktrees/experiment/my-thing -b experiment/my-thing
+```
+
+### Branches
+
+Naming: `feature/`, `fix/`, `refactor/`, `experiment/` + short description.
+
+- Branch for any non-trivial change (multiple commits)
+- Single small fixes on personal projects: main is fine
+
+### Python venvs
+
+Always check before running Python. Look for `.venv` or `venv` directory.
+
+Use the `venv` command:
+- `venv` - creates venv + installs requirements.txt if missing, or toggles active/inactive
+- `venv --regenerate` - nuke and recreate from scratch
+- `venv --version 3.11` - specific Python version
+
+Never use `python -m venv` or `source .venv/bin/activate` directly.

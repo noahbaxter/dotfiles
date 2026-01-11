@@ -70,16 +70,17 @@
       "Bash(npm uninstall:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force:*)"
-    ]
+    ],
+    "defaultMode": "plan"
   },
-  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
     "padding": 0
   },
   "enabledPlugins": {
-    "feature-dev@claude-code-plugins": true
+    "clangd-lsp@claude-plugins-official": false,
+    "superpowers@superpowers-marketplace": false
   },
   "alwaysThinkingEnabled": true
 }
